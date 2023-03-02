@@ -16,7 +16,10 @@ class Board:
         self.pos = [str(x) for x in range(1, 10)]
 
     # Run a cycle of tic-tac-toe
-    def tick(self, square: int, turn: bool):
+    def tick(self, square: int, turn: bool) -> bool:
+        if self.pos[square - 1] in ["X", "O"]:
+            return False
+        
         # Update the pos array
         if not turn:
             # Player X
@@ -32,3 +35,5 @@ class Board:
             self.gamestate = Gamestates.X_WIN
         elif winner == "O":
             self.gamestate = Gamestates.O_WIN
+
+        return True

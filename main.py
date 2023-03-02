@@ -26,9 +26,6 @@ boards = None
 # Global board with final win conditions
 gpos = None
 
-# Hold the current global gamestate
-gamestate = None
-
 # Hold the user's target board
 boardnum = 0
 
@@ -56,43 +53,39 @@ def print_gamestate():
     global gpos, gamestate, boards
 
     # Print the global board
-    print("Global board:")
     for i, x in enumerate(gpos.pos):
         print(f"{x} ", end="")
         if i % 3 == 2:
             print()
 
     # Print the smaller boards
-    print("Local boards:")
+    print()
     for row in range(3):
         # Print top row of each board
-        for i, board in enumerate(boards[row*3:row*3+3]):
-            if i == 0:
-                # Change colour of number if it has been won by a player
-                if board.gamestate == Gamestates.X_WIN:
-                    print(f"| {Fore.RED}{row*3+1}{Fore.RESET} |", end="")
-                elif board.gamestate == Gamestates.O_WIN:
-                    print(f"| {Fore.BLUE}{row*3+1}{Fore.RESET} |", end="")
-                else:
-                    print(f" __ {row*3+1} __ ", end="")
-            elif i == 1:
-                print(f"__ {row*3+2} __ ", end="")
+        for i, board in enumerate(boards[row * 3:row * 3 + 3]):
+            number = row*3 + i + 1
+            if i == 0 and board.gamestate == Gamestates.X_WIN:
+                print(f"|__ {Fore.RED}{number}{Fore.RESET} __|", end="")
+            elif i == 0 and board.gamestate == Gamestates.O_WIN:
+                print(f"|__ {Fore.BLUE}{number}{Fore.RESET} __|", end="")
             else:
-                print(f"__ {row*3+3} __ ", end="")
+                print(f"|__ {number} __", end="")
+        print("|", end="")
         print()
         for j in range(3):
             # Print each row of cells for each board
-            for i, board in enumerate(boards[row*3:row*3+3]):
+            for i, board in enumerate(boards[row * 3:row * 3 + 3]):
                 print("| ", end="")
                 for k in range(3):
-                    x = board.pos[j*3+k]
-                    print(f"{COLOURS[x] if x == 'X' or x == 'O' else ''}{x} ", end="")
+                    x = board.pos[j * 3 + k]
+                    print(f"{COLOURS[x] if x == 'X' or x == 'O' else ''}{x} ",
+                          end="")
                     print(Fore.RESET, end="")
                 if i == 2:
                     print("|", end="")
             print()
         # Print bottom row of each board
-        for i, board in enumerate(boards[row*3:row*3+3]):
+        for i, board in enumerate(boards[row * 3:row * 3 + 3]):
             if i == 0:
                 print("| ----- |", end="")
             elif i == 1:
@@ -104,38 +97,40 @@ def print_gamestate():
 
 # Primary game tick
 def gametick():
-    global gpos, boardnum, gamestate, turn_cycle
+    global gpos, boardnum, turn_cycle
 
     # Get target board for the player if there is no selected board
     if boardnum == 0:
         boardnum = get_input("Enter target board (1-9): ")
 
     # Get the square they want and check if it's valid
-    square = get_input(f"Enter target square on board {boardnum} (1-9): ")
-
-    # Update the board in target
-    if boards[int(boardnum) - 1].tick(square, turn_cycle):
-        # Returns true if the board modification was successful
-        ...
-    else:
-        ...
+    square = None
+    while not square:
+        square = get_input(f"Enter target square on board {boardnum} (1-9): ")
+        # Update the board in target
+        if not boards[int(boardnum) - 1].tick(square, turn_cycle):
+            # Returns false if that position could not be updated
+            print("You cannot place a square there!")
+            square = None
 
     # Update the next person's turn and what board they will play on
     # If that board is full, then the player will be able to select whatever board they want
     try:
-        boardnum = square if not Evaluator.is_board_full(boards[square]) else 0
+        boardnum = square if not Evaluator.is_board_full(boards[square -
+                                                                1]) else 0
     except IndexError:
         # Bug with the boardnum variable where 9 is not valid and raises IndexError
         # The user input is already validated to be within 1-9 so this is a workaround
         boardnum = 9
 
     # Check if a (global) win or draw circumstance has happened
-    if not (winner := Evaluator.who_won(gpos)) and Evaluator.is_board_full(gpos):
-        gamestate = Gamestates.DRAW
+    if not (winner :=
+            Evaluator.who_won(gpos)) and Evaluator.is_board_full(gpos):
+        gpos.gamestate = Gamestates.DRAW
     elif winner == "X":
-        gamestate = Gamestates.X_WIN
+        gpos.gamestate = Gamestates.X_WIN
     elif winner == "O":
-        gamestate = Gamestates.O_WIN
+        gpos.gamestate = Gamestates.O_WIN
 
     # Update turn cycle
     turn_cycle = not turn_cycle
@@ -154,9 +149,20 @@ def main():
     # Initialise the global board
     gpos = Board(0)
 
+    # Print the original board
+    print_gamestate()
+
     # Main game loop
     while gpos.gamestate == Gamestates.PLAY:
         gametick()
+
+    # Handle final winner
+    if gpos.gamestate == Gamestates.DRAW:
+        print("The game is a draw!")
+    elif gpos.gamestate == Gamestates.X_WIN:
+        print("X wins!")
+    elif gpos.gamestate == Gamestates.O_WIN:
+        print("O wins!")
 
     # Request rematch
     if input("Play again? [y] ") == "y":
