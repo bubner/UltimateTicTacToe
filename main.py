@@ -4,7 +4,6 @@
 # Import colour functionality to the console for quality of life
 from colorama import Fore
 from eval import Evaluator
-from user import User
 from board import Board
 
 
@@ -24,23 +23,32 @@ class Players:
 # Global board with 9 smaller boards and turn cycle variable
 gpos = gamestate = None
 boardnum = 0
+turn_cycle = False
 
 # Define colours for both X and O elements
 COLOURS = {"X": Fore.RED, "O": Fore.BLUE}
 
+# Get valid user input and make sure it is valid
+def get_input(text):
+    while True:
+        res = input(text)
+        if not res:
+            print("Please enter a valid input.")
+        else:
+            return res
 
 # Primary game tick
 def gametick():
-    global gpos, boardnum
+    global gpos, boardnum, gamestate, turn_cycle
 
     # Get target board for the player if there is no selected board
     if boardnum == 0:
-        boardnum = User.select_board(Players.Player_X if not turn_cycle else Players.Player_O)
-
+        boardnum = get_input("Enter target board (1-9): ")
+        
     # Get the square they want and check if it's valid
-    square = User.select_square(boardnum, Players.Player_X if not turn_cycle else Players.Player_O)
+    square = get_input(f"Enter target square on board {boardnum}: ")
 
-    # Update the board number
+    # Update the board target
     gpos[int(boardnum)].tick(square)
 
     # Check if a (global) win or draw circumstance has happened
@@ -48,6 +56,9 @@ def gametick():
         gamestate = Gamestates.X_WIN if turn_cycle else Gamestates.O_WIN
     elif Evaluator.check_draw(gpos):
         gamestate = Gamestates.DRAW
+
+    # Update turn cycle
+    turn_cycle = not turn_cycle
 
 
 # Entrypoint function
