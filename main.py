@@ -73,7 +73,7 @@ def print_gamestate():
     print()
 
     # Print a move count
-    print(f"Moves: {moves}")
+    print(f"Move: {moves}")
     if players == 0 or (players == 1 and not turn_cycle):
         # If the computer made a move, display which one it made
         print(f"Computer played: {boardnum}")
@@ -200,8 +200,8 @@ def game_tick():
     print_gamestate()
 
     if players == 0:
-        # If the game is vs the computer, wait 150ms before the computer makes its move
-        sleep(0.15)
+        # If the game is vs the computer, wait 250ms before the computer makes its move
+        sleep(0.25)
 
 
 # Entrypoint function
