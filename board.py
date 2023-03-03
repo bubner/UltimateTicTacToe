@@ -29,11 +29,13 @@ class Board:
             self.pos[square - 1] = "O"
 
         # Check if a win or draw circumstance has happened
-        if not (winner := Evaluator.who_won(self)) and Evaluator.is_board_full(self):
-            self.gamestate = Gamestates.DRAW
-        elif winner == "X":
-            self.gamestate = Gamestates.X_WIN
-        elif winner == "O":
-            self.gamestate = Gamestates.O_WIN
+        # Ensure this check only happens when it needs to
+        if self.gamestate == Gamestates.PLAY:
+            if not (winner := Evaluator.who_won(self)) and Evaluator.is_board_full(self):
+                self.gamestate = Gamestates.DRAW
+            elif winner == "X":
+                self.gamestate = Gamestates.X_WIN
+            elif winner == "O":
+                self.gamestate = Gamestates.O_WIN
 
         return True
