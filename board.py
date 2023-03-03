@@ -1,4 +1,4 @@
-# Sub game handler for tic-tac-toe
+# Board handler class for internal games and the global game
 from eval import Evaluator
 
 
