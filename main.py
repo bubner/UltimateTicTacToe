@@ -11,7 +11,7 @@ from time import sleep
 from colorama import Fore
 
 from board import Board
-from eval import Evaluator
+from eval import Evaluator, Engine
 
 
 # Using an enum to store the current gamestate
@@ -45,6 +45,9 @@ players = None
 # Determine who's turn it is
 turn_cycle = False
 
+# Hold an instance of the Engine class to evaluate the gamestate
+engine = None
+
 # Define colours for both X and O elements
 COLOURS = {"X": Fore.RED, "O": Fore.BLUE}
 
@@ -55,7 +58,15 @@ def get_input(text: str) -> int:
     while True:
         try:
             if players == 0 or (players == 1 and current == "O"):
-                return randint(1, 9)
+                # EXPERIMENTAL COMPUTER ENGINE
+                engine_res = engine.run(boards[boardnum - 1], turn_cycle)
+                # If the engine doesn't make a move, resort to random numbers
+                # This is because the engine will only make a move assuming it is playing on a singular board
+                # as we are only passing the board to the engine, not the global board with the state of all boards
+                # See eval.py Engine class for more limitations
+                if engine_res is None:
+                    return randint(1, 9)
+                return engine_res
             res = int(input(f"{COLOURS[current]}Player {current}{Fore.RESET} - {text}"))
             if res and 1 <= res <= 9:
                 return res
@@ -206,7 +217,7 @@ def game_tick():
 
 # Entrypoint function
 def main():
-    global gpos, boards, moves, players
+    global gpos, boards, moves, players, engine
 
     print(f"{Fore.RED}Welcome to Ultimate Tic-Tac-Toe!{Fore.RESET}")
     print("The rules are simple: get 3 in a row on any of the 9 smaller boards to win that board.")
@@ -240,6 +251,9 @@ def main():
 
     # Print the original board
     print_gamestate()
+
+    # Initialise the engine at time limit of 5 and max depth of 20 recursions
+    engine = Engine(5, 20)
 
     # Main game loop
     while gpos.gamestate == Gamestates.PLAY:

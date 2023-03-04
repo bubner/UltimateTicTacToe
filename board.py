@@ -17,7 +17,10 @@ class Board:
 
     # Run a cycle of tic-tac-toe
     def tick(self, square: int, turn: bool) -> bool:
-        if self.pos[square - 1] in ["X", "O"]:
+        try:
+            if self.pos[square - 1] in ["X", "O"]:
+                return False
+        except TypeError:
             return False
         
         # Update the pos array
