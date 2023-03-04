@@ -69,11 +69,13 @@ class Engine:
         self.TIME_LIMIT = time
         self.MAX_DEPTH = depth
         self.best_move = None
+        self.runs = 0
 
     # Run the engine
     def run(self, board, turn):
         # Reset the best move before each run
         self.best_move = None
+        self.runs = 0
         # Return the best move using the Minimax algorithm with alpha-beta pruning
         self.minimax(board, self.MAX_DEPTH, turn, True, -float('inf'), float('inf'))
         return self.best_move
@@ -96,6 +98,7 @@ class Engine:
                 # Make the move on the hypothetical board
                 new_board = deepcopy(board)
                 new_board.pos[move - 1] = "O" if turn else "X"
+                self.runs += 1
                 # Get the minimax value for the new board using recursion
                 value = self.minimax(new_board, depth - 1, not turn, False, alpha, beta)
                 # Update the best value and best move
@@ -117,6 +120,7 @@ class Engine:
                 # Make the move on the hypothetical board
                 new_board = deepcopy(board)
                 new_board.pos[move - 1] = "O" if turn else "X"
+                self.runs += 1
                 # Get the minimax value for the new board using recursion
                 value = self.minimax(new_board, depth - 1, not turn, True, alpha, beta)
                 # Update the best value and best move
@@ -130,4 +134,3 @@ class Engine:
                     break
             # Return the best value
             return best_value
-

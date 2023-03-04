@@ -90,9 +90,9 @@ def print_gamestate():
 
     # Print a move count
     print(f"Move: {moves}")
-    if players == 1 and not turn_cycle:
+    if players == 1 and not turn_cycle and engine is not None:
         # If the computer made a move, display which one it made
-        print(f"Engine played: {boardnum}")
+        print(f"Engine played: square {boardnum} after running {engine.runs} simulations")
     elif players == 0:
         print(f"Computer played: {boardnum}")
 
@@ -224,7 +224,7 @@ def game_tick():
 
 # Entrypoint function
 def main():
-    global gpos, boards, moves, players, engine, turn_cycle
+    global gpos, boards, moves, players, engine, turn_cycle, boardnum
 
     print(f"{Fore.RED}Welcome to Ultimate Tic-Tac-Toe!{Fore.RESET}")
     print("The rules are simple: get 3 in a row on any of the 9 smaller boards to win that board.")
@@ -255,6 +255,7 @@ def main():
     # Initialise the global board
     gpos = Board(0)
     turn_cycle = False
+    boardnum = 0
     moves = 0
 
     # Print the original board
