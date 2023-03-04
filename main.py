@@ -57,7 +57,7 @@ def get_input(text: str) -> int:
     current = "O" if turn_cycle else "X"
     while True:
         try:
-            if players == 0 or (players == 1 and current == "O"):
+            if players == 1 and current == "O":
                 # EXPERIMENTAL COMPUTER ENGINE
                 engine_res = engine.run(boards[boardnum - 1], turn_cycle)
                 # If the engine doesn't make a move, resort to random numbers
@@ -67,6 +67,11 @@ def get_input(text: str) -> int:
                 if engine_res is None:
                     return randint(1, 9)
                 return engine_res
+            elif players == 0:
+                # If the computer is playing against itself, just use random numbers because it will always result
+                # in the same outcome as the engine is not aware of winning and losing positions
+                return randint(1, 9)
+            # Standard user input for each player
             res = int(input(f"{COLOURS[current]}Player {current}{Fore.RESET} - {text}"))
             if res and 1 <= res <= 9:
                 return res
@@ -85,8 +90,10 @@ def print_gamestate():
 
     # Print a move count
     print(f"Move: {moves}")
-    if players == 0 or (players == 1 and not turn_cycle):
+    if players == 1 and not turn_cycle:
         # If the computer made a move, display which one it made
+        print(f"Engine played: {boardnum}")
+    elif players == 0:
         print(f"Computer played: {boardnum}")
 
     # Print the smaller boards
@@ -211,13 +218,13 @@ def game_tick():
     print_gamestate()
 
     if players == 0:
-        # If the game is vs the computer, wait 250ms before the computer makes its move
-        sleep(0.25)
+        # If the game is vs the computer, wait 400ms before the computer makes its move
+        sleep(0.4)
 
 
 # Entrypoint function
 def main():
-    global gpos, boards, moves, players, engine
+    global gpos, boards, moves, players, engine, turn_cycle
 
     print(f"{Fore.RED}Welcome to Ultimate Tic-Tac-Toe!{Fore.RESET}")
     print("The rules are simple: get 3 in a row on any of the 9 smaller boards to win that board.")
@@ -228,8 +235,8 @@ def main():
 
     # Select options
     print(Fore.CYAN + "How many players? (0-2)" + Fore.RESET)
-    print("""    0 will play the computer against itself
-    1 will play against the computer
+    print("""    0 will play the computer (RNG) against itself
+    1 will play against the computer (minimax algorithm AI)
     2 will play against another player
     """)
 
@@ -247,6 +254,7 @@ def main():
 
     # Initialise the global board
     gpos = Board(0)
+    turn_cycle = False
     moves = 0
 
     # Print the original board

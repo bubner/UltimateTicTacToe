@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-@author: Pulkit Maloo
+    Ultimate Tic-Tac-Toe Engine
+
+    NOT USED in the game code but here for reference in
+    understanding how AI decisions work with the Minimax and Alpha-Beta pruning algorithms
+
+    @author: Pulkit Maloo
 """
 
 # =============================================================================
