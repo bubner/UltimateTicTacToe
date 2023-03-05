@@ -11,7 +11,7 @@ from time import sleep
 from colorama import Fore
 
 from board import Board
-from eval import Evaluator
+from eval import Evaluator, Engine
 
 
 # Using an enum to store the current gamestate
@@ -45,6 +45,9 @@ players = None
 # Determine who's turn it is
 turn_cycle = False
 
+# Hold an instance of the Engine class to evaluate the gamestate
+engine = None
+
 # Define colours for both X and O elements
 COLOURS = {"X": Fore.RED, "O": Fore.BLUE}
 
@@ -54,8 +57,21 @@ def get_input(text: str) -> int:
     current = "O" if turn_cycle else "X"
     while True:
         try:
-            if players == 0 or (players == 1 and current == "O"):
+            if players == 1 and current == "O":
+                # EXPERIMENTAL COMPUTER ENGINE
+                engine_res = engine.run(boards[boardnum - 1], turn_cycle)
+                # If the engine doesn't make a move, resort to random numbers
+                # This is because the engine will only make a move assuming it is playing on a singular board
+                # as we are only passing the board to the engine, not the global board with the state of all boards
+                # See eval.py Engine class for more limitations
+                if engine_res is None:
+                    return randint(1, 9)
+                return engine_res
+            elif players == 0:
+                # If the computer is playing against itself, just use random numbers because it will always result
+                # in the same outcome as the engine is not aware of winning and losing positions
                 return randint(1, 9)
+            # Standard user input for each player
             res = int(input(f"{COLOURS[current]}Player {current}{Fore.RESET} - {text}"))
             if res and 1 <= res <= 9:
                 return res
@@ -74,8 +90,10 @@ def print_gamestate():
 
     # Print a move count
     print(f"Move: {moves}")
-    if players == 0 or (players == 1 and not turn_cycle):
+    if players == 1 and not turn_cycle and engine is not None:
         # If the computer made a move, display which one it made
+        print(f"Engine played: square {boardnum} after running {engine.runs} simulations")
+    elif players == 0:
         print(f"Computer played: {boardnum}")
 
     # Print the smaller boards
@@ -200,13 +218,13 @@ def game_tick():
     print_gamestate()
 
     if players == 0:
-        # If the game is vs the computer, wait 250ms before the computer makes its move
-        sleep(0.25)
+        # If the game is vs the computer, wait 400ms before the computer makes its move
+        sleep(0.4)
 
 
 # Entrypoint function
 def main():
-    global gpos, boards, moves, players
+    global gpos, boards, moves, players, engine, turn_cycle, boardnum
 
     print(f"{Fore.RED}Welcome to Ultimate Tic-Tac-Toe!{Fore.RESET}")
     print("The rules are simple: get 3 in a row on any of the 9 smaller boards to win that board.")
@@ -217,8 +235,8 @@ def main():
 
     # Select options
     print(Fore.CYAN + "How many players? (0-2)" + Fore.RESET)
-    print("""    0 will play the computer against itself
-    1 will play against the computer
+    print("""    0 will play the computer (RNG) against itself
+    1 will play against the computer (minimax algorithm AI)
     2 will play against another player
     """)
 
@@ -236,10 +254,15 @@ def main():
 
     # Initialise the global board
     gpos = Board(0)
+    turn_cycle = False
+    boardnum = 0
     moves = 0
 
     # Print the original board
     print_gamestate()
+
+    # Initialise the engine at a max depth of 15 recursions
+    engine = Engine(15)
 
     # Main game loop
     while gpos.gamestate == Gamestates.PLAY:
