@@ -261,8 +261,8 @@ def main():
     # Print the original board
     print_gamestate()
 
-    # Initialise the engine at time limit of 5 and max depth of 20 recursions
-    engine = Engine(5, 20)
+    # Initialise the engine at a max depth of 15 recursions
+    engine = Engine(15)
 
     # Main game loop
     while gpos.gamestate == Gamestates.PLAY:

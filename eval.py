@@ -65,8 +65,7 @@ class Evaluator:
 #              The engine also sometimes makes the worst possible move when given a board state with a winning move.
 #              AI systems are a difficult task...
 class Engine:
-    def __init__(self, time, depth):
-        self.TIME_LIMIT = time
+    def __init__(self, depth):
         self.MAX_DEPTH = depth
         self.best_move = None
         self.runs = 0
